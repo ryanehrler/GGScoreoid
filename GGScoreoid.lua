@@ -55,6 +55,7 @@ GGScoreoid.Method.GetPlayers = "getPlayers"
 GGScoreoid.Method.GetPlayerScores = "getPlayerScores"
 
 -- Scores
+GGScoreoid.Method.CreateScore = "createScore"
 GGScoreoid.Method.GetScores = "getScores"
 GGScoreoid.Method.CountScores = "countScores"
 GGScoreoid.Method.GetBestScores = "getBestScores"
@@ -302,6 +303,23 @@ function GGScoreoid:getPlayerScores( username, startDate, endDate, difficulty, o
 	options.end_date = endDate
 	options.difficulty = difficulty
 	self:makeRequest( GGScoreoid.Method.GetPlayerScores, options, onComplete )
+end
+
+--- Create a new score.
+-- @param score The value of the score to create.
+-- @param username The username of the player.
+-- @param platform Optional string for the name of the platform to count. Matching the value set when creating/editing the player.
+-- @param uniqueID Optional id for the score.
+-- @param difficulty Optional difficulty level between 1 and 10. Don't use 0.
+-- @param onComplete Optional function to be called when the request is complete. One argument are passed; 'scores'. A table of scores with the paramaters as specified here - http://wiki.scoreoid.net/api/player/getplayerscores/
+function GGScoreoid:createScore( score, username, platform, uniqueID, difficulty, onComplete )
+	local options = {}
+	options.score = score
+	options.username = username
+	options.platform = platform
+	options.unique_id = unique_id
+	options.difficulty = difficulty
+	self:makeRequest( GGScoreoid.Method.CreateScore, options, onComplete )
 end
 
 --- Gets all existing scores.
