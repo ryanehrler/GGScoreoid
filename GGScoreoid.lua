@@ -122,14 +122,11 @@ function GGScoreoid:makeRequest( method, requestParams, onComplete )
         			elseif response.players then -- Player Count
         				onComplete( response.players )
         			elseif method == GGScoreoid.Method.CountScores or
-							method == GGScoreoid.Method.GetBestScores or
 							method == GGScoreoid.Method.GetAverageScore or
 							method == GGScoreoid.Method.CountBestScores then -- Score Count
         				onComplete( response.scores )
         			elseif response.average_score then -- Average Score
         				onComplete( response.average_score )
-        			elseif response.best_scores then -- Best Scores
-        				onComplete( response.best_scores )
         			elseif response.notifications then -- Notifications
         		
         				local notifications = {}
@@ -352,7 +349,7 @@ end
 -- @param platform Optional string for the name of the platform to count. Matching the value set when creating/editing the player.
 -- @param difficulty Optional difficulty level between 1 and 10. Don't use 0.
 -- @param onComplete Optional function to be called when the request is complete. One argument is passed; 'scores'. A table of scores with the paramaters as specified here - http://wiki.scoreoid.net/api/player/getscores/
-function GGScoreoid:getBestScores( startDate, endDate, platform, difficulty, onComplete )
+function GGScoreoid:getScores( orderBy, order, limit, startDate, endDate, platform, difficulty, onComplete )
 	local options = {}
 	options.orderBy = orderBy
 	options.order = order
