@@ -257,7 +257,7 @@ end
 -- @param onComplete Optional function to be called when the request is complete. One argument is passed; 'players'.
 function GGScoreoid:getPlayers( orderBy, order, limit, startDate, endDate, platform, onComplete )
 	local options = {}
-	options.orderBy = orderBy
+	options.order_by = orderBy
 	options.order = order
 	options.limit = limit
 	options.start_date = startDate
@@ -333,7 +333,7 @@ end
 -- @param onComplete Optional function to be called when the request is complete. One argument is passed; 'scores'. A table of scores with the paramaters as specified here - http://wiki.scoreoid.net/api/player/getscores/
 function GGScoreoid:getScores( orderBy, order, limit, startDate, endDate, platform, difficulty, onComplete )
 	local options = {}
-	options.orderBy = orderBy
+	options.order_by = orderBy
 	options.order = order
 	options.limit = limit
 	options.start_date = startDate
@@ -369,7 +369,7 @@ end
 -- @param onComplete Optional function to be called when the request is complete. One argument is passed; 'scores'. A table of scores with the paramaters as specified here - http://wiki.scoreoid.net/api/player/getscores/
 function GGScoreoid:getScores( orderBy, order, limit, startDate, endDate, platform, difficulty, onComplete )
 	local options = {}
-	options.orderBy = orderBy
+	options.order_by = orderBy
 	options.order = order
 	options.limit = limit
 	options.start_date = startDate
