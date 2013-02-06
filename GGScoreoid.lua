@@ -367,7 +367,7 @@ end
 -- @param platform Optional string for the name of the platform to count. Matching the value set when creating/editing the player.
 -- @param difficulty Optional difficulty level between 1 and 10. Don't use 0.
 -- @param onComplete Optional function to be called when the request is complete. One argument is passed; 'scores'. A table of scores with the paramaters as specified here - http://wiki.scoreoid.net/api/player/getscores/
-function GGScoreoid:getScores( orderBy, order, limit, startDate, endDate, platform, difficulty, onComplete )
+function GGScoreoid:getBestScores( orderBy, order, limit, startDate, endDate, platform, difficulty, onComplete )
 	local options = {}
 	options.order_by = orderBy
 	options.order = order
