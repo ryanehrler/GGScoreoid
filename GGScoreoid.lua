@@ -61,6 +61,9 @@ GGScoreoid.Method.CountScores = "countScores"
 GGScoreoid.Method.GetBestScores = "getBestScores"
 GGScoreoid.Method.GetAverageScore = "getAverageScore"
 GGScoreoid.Method.CountBestScores = "countBestScores"
+GGScoreoid.Method.GetBestScoresAroundPlayer = "getBestScoresAroundPlayer"
+GGScoreoid.Method.GetBestScoresAroundPlayer = "getBestScoresAroundScore"
+GGScoreoid.Method.IncrementScore = "incrementScore"
 
 -- Game
 GGScoreoid.Method.GetGame = "getGame"
@@ -70,6 +73,9 @@ GGScoreoid.Method.GetGameTop = "getGameTop"
 GGScoreoid.Method.GetGameLowest = "getGameLowest"
 GGScoreoid.Method.GetGameTotal = "getGameTotal"
 GGScoreoid.Method.GetNotification = "getNotification"
+
+-- Events
+GGScoreoid.Method.TrackEvent = "trackEvent"
 
 --- Creates a new GGScoreoid object.
 -- @return The new object.
@@ -88,12 +94,13 @@ function GGScoreoid:new( apiKey, gameID )
 end
 
 function GGScoreoid:makeRequest( method, requestParams, onComplete )
-
+	
 	if not method then
 		return
 	end
 
 	local function networkListener( event )
+		
         if event.isError then
         	if onComplete then
         		onComplete( false, "Network error!" )
@@ -107,6 +114,7 @@ function GGScoreoid:makeRequest( method, requestParams, onComplete )
         		if event.response then
         			response = json.decode( event.response )
         		end
+        		
         		
         		if response then
         			
@@ -160,10 +168,14 @@ function GGScoreoid:makeRequest( method, requestParams, onComplete )
 							end
 							
         					onComplete( content, field )
-        					
+        				
+        				elseif method == GGScoreoid.Method.CreateScore or method == GGScoreoid.Method.IncrementScore then
+        					onComplete( response )	
         				elseif method == GGScoreoid.Method.GetPlayerScores 
         				or method == GGScoreoid.Method.GetScores 
-        				or method == GGScoreoid.Method.GetBestScores then
+        				or method == GGScoreoid.Method.GetBestScores
+        				or method == GetBestScoresAroundPlayer
+        				or method == GetBestScoresAroundScore then
         			
         					local scores = {}
         					
@@ -193,9 +205,13 @@ function GGScoreoid:makeRequest( method, requestParams, onComplete )
 	local url = self.apiURL .. method
 	
 	local postData = ""
-	
+		
 	for k, v in pairs( requestParams ) do
-		postData = postData .. k .. "=" .. v .. "&"
+		if type( k ) ~= "function" and type( k ) ~= "table" then
+			if type( v ) ~= "function" and type( v ) ~= "table" then
+				postData = postData .. k .. "=" .. v .. "&"
+			end
+		end	
 	end
 	
 	local params = {}
@@ -311,7 +327,7 @@ end
 -- @param platform Optional string for the name of the platform to count. Matching the value set when creating/editing the player.
 -- @param uniqueID Optional id for the score.
 -- @param difficulty Optional difficulty level between 1 and 10. Don't use 0.
--- @param onComplete Optional function to be called when the request is complete. One argument are passed; 'scores'. A table of scores with the paramaters as specified here - http://wiki.scoreoid.net/api/player/getplayerscores/
+-- @param onComplete Optional function to be called when the request is complete. One argument are passed; a table with either success or failure as specified here - http://wiki.scoreoid.net/api/score/createscore/
 function GGScoreoid:createScore( score, username, platform, uniqueID, difficulty, onComplete )
 	local options = {}
 	options.score = score
@@ -320,6 +336,23 @@ function GGScoreoid:createScore( score, username, platform, uniqueID, difficulty
 	options.unique_id = unique_id
 	options.difficulty = difficulty
 	self:makeRequest( GGScoreoid.Method.CreateScore, options, onComplete )
+end
+
+--- Increments the best score of a player.
+-- @param username The username of the player.
+-- @param score The amount to increment the score by.
+-- @param platform Optional string for the name of the platform to count. Matching the value set when creating/editing the player.
+-- @param uniqueID Optional id for the score.
+-- @param difficulty Optional difficulty level between 1 and 10. Don't use 0.
+-- @param onComplete Optional function to be called when the request is complete. One argument are passed; a table with either success or failure as specified here - http://wiki.scoreoid.net/api/score/createscore/
+function GGScoreoid:incrementScore( username, score, platform, uniqueID, difficulty, onComplete )
+	local options = {}
+	options.score = score
+	options.username = username
+	options.platform = platform
+	options.unique_id = unique_id
+	options.difficulty = difficulty
+	self:makeRequest( GGScoreoid.Method.IncrementScore, options, onComplete )
 end
 
 --- Gets all existing scores.
@@ -409,6 +442,44 @@ function GGScoreoid:countBestScores( startDate, endDate, platform, difficulty, o
 	self:makeRequest( GGScoreoid.Method.CountBestScores, options, onComplete )
 end
 
+--- Gets the best scores around a player.
+-- @param username The username for the player.
+-- @param limit Limit '20' retrieves the 10 best scores lower than the players best and the 10 best scores higher than the best.
+-- @param startDate Optional start date for the retrieval in YYYY-MM-DD format.
+-- @param endDate Optional end date for the retrieval in YYYY-MM-DD format.
+-- @param platform Optional string for the name of the platform to count. Matching the value set when creating/editing the player.
+-- @param difficulty Optional difficulty level between 1 and 10. Don't use 0.
+-- @param onComplete Optional function to be called when the request is complete. One argument is passed; 'scores'. A table of scores, which includes the players score, with the paramaters as specified here - http://wiki.scoreoid.net/api/player/getBestScoresAroundPlayer/
+function GGScoreoid:getBestScoresAroundPlayer( username, limit, startDate, endDate, platform, difficulty, onComplete )
+	local options = {}
+	options.username = username
+	options.limit = limit
+	options.start_date = startDate
+	options.end_date = endDate
+	options.platform = platform
+	options.difficulty = difficulty
+	self:makeRequest( GGScoreoid.Method.GetBestScoresAroundPlayer, options, onComplete )
+end
+
+--- Gets the best scores around another score.
+-- @param score The score to search around.
+-- @param limit Limit '20' retrieves the 10 best scores lower than the passed in score and the 10 best scores higher than the score.
+-- @param startDate Optional start date for the retrieval in YYYY-MM-DD format.
+-- @param endDate Optional end date for the retrieval in YYYY-MM-DD format.
+-- @param platform Optional string for the name of the platform to count. Matching the value set when creating/editing the player.
+-- @param difficulty Optional difficulty level between 1 and 10. Don't use 0.
+-- @param onComplete Optional function to be called when the request is complete. One argument is passed; 'scores'. A table of scores, that doesn't include the passed in score, with the paramaters as specified here - http://wiki.scoreoid.net/api/player/getBestScoresAroundScore/
+function GGScoreoid:getBestScoresAroundScore( score, limit, startDate, endDate, platform, difficulty, onComplete )
+	local options = {}
+	options.score = score
+	options.limit = limit
+	options.start_date = startDate
+	options.end_date = endDate
+	options.platform = platform
+	options.difficulty = difficulty
+	self:makeRequest( GGScoreoid.Method.GetBestScoresAroundScore, options, onComplete )
+end
+
 --- Gets the game information.
 -- @param onComplete Optional function to be called when the request is complete. One argument is passed; 'game'.
 function GGScoreoid:getGame( onComplete )
@@ -488,6 +559,17 @@ end
 -- @param onComplete Optional function to be called when the request is complete. One argument is passed; 'notifications'.
 function GGScoreoid:getGameNotifications( onComplete )
 	self:makeRequest( GGScoreoid.Method.GetNotification, nil, onComplete )
+end
+
+-- @param event The name of the event to track.
+-- @param username The username for the player.
+-- @param timeframe The minimum granularity to record. Can be one of: hourly, daily, weekly, monthly.
+function GGScoreoid:trackEvent( event, username, timeframe )
+	local options = {}
+	options.event = event
+	options.username = username
+	options.timeframe = timeframe
+	self:makeRequest( GGScoreoid.Method.TrackEvent, options, onComplete )
 end
 
 --- Destroys this GGScoreoid object.
